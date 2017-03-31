@@ -156,3 +156,26 @@ class ZebraBackend(BaseBackend):
             projects_list.append(p)
 
         return projects_list
+
+    @needs_authentication
+    def get_balance(self):
+        # TODO insert correct user
+        user_url = self.get_api_url('/user/{}').format('stefan.heinemann')
+        try:
+            response = self._session.get(user_url)
+            user_data = response.json()
+        except ValueError:
+            raise TaxiException(
+                "Unexpected response from the server (%s).  Check your "
+                "credentials" % response.content
+            )
+
+        hours = user_data['data']['hours']
+        education = user_data['data']['education']
+
+        data = {}
+
+        data.update(hours)
+        data['education'] = education
+
+        return data
