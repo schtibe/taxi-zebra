@@ -1,3 +1,4 @@
+import colorama
 import datetime
 
 import click
@@ -75,10 +76,37 @@ def balance(ctx):
     vacation_balance = '{} days, {:.2f} hours'.format(*vacation)
 
     hours_balance = user_info['hours']['hours']['balance']
+    hours_balance_after_push = hours_balance = + hours_to_be_pushed
 
-    click.echo("Hours balance: {}".format(signed_number(hours_balance)))
-    click.echo("Hours balance after push: {}".format(signed_number(hours_balance + hours_to_be_pushed)))
-    click.echo("Hours done this week: {:.2f}".format(total_duration_week))
-    click.echo("Hours done today: {:.2f}".format(total_duration_today))
+    def colored_output(value, threshold, str_value=None):
+        if str_value is None:
+            str_value = value
+
+        if value > threshold:
+            color = colorama.Fore.GREEN
+        elif value < threshold:
+            color = colorama.Fore.RED
+        else:
+            color = colorama.Fore.YELLOW
+
+        return {
+            "color": color,
+            "value": str_value,
+            "reset": colorama.Fore.RESET
+        }
+
+    click.echo("Hours balance: {color}{value}{reset}".format(**colored_output(
+        hours_balance, 0, signed_number(hours_balance))))
+
+    click.echo("Hours balance after push: {color}{value}{reset}".format(
+        **colored_output(hours_balance_after_push, 0, signed_number(hours_balance_after_push))))
+
+    click.echo("Hours done this week: {color}{value:.2f}{reset}".format(
+        **colored_output(total_duration_week, 40)
+    ))
+
+    click.echo("Hours done today: {color}{value:.2f}{reset}".format(
+        **colored_output(total_duration_today, 8)
+    ))
     click.echo("Hours to be pushed: {:.2f}".format(hours_to_be_pushed))
     click.echo("Vacation left: {}".format(vacation_balance))
